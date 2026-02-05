@@ -14,14 +14,14 @@ interface ValidationResult {
 /**
  * Find all JSON files in the specified folder
  */
-export async function findJsonFiles(folder: string): Promise<string[]> {
+export async function findJsonFiles(folder: string, ignorePatterns: string[] = ['**/node_modules/**', '**/dist/**', '**/lib/**', '**/.git/**']): Promise<string[]> {
   const searchPath = path.join(process.cwd(), folder);
   
   // Use fast-glob to find all .json files recursively
   const files = await fg('**/*.json', {
     cwd: searchPath,
     absolute: true,
-    ignore: ['**/node_modules/**', '**/dist/**', '**/lib/**', '**/.git/**']
+    ignore: ignorePatterns
   });
   
   return files;
@@ -111,11 +111,23 @@ export async function run(): Promise<void> {
     // Get inputs
     const folder = core.getInput('folder') || '.';
     const schemaPath = core.getInput('schema');
+    const ignoreInput = core.getInput('ignore');
+    
+    // Parse ignore patterns (support comma or newline separated)
+    const ignorePatterns = ignoreInput
+      ? ignoreInput
+          .split(/[,\n]/)
+          .map(pattern => pattern.trim())
+          .filter(pattern => pattern.length > 0)
+      : ['**/node_modules/**', '**/dist/**', '**/lib/**', '**/.git/**'];
     
     core.info(`Scanning for JSON files in: ${folder}`);
+    if (ignorePatterns.length > 0) {
+      core.info(`Ignoring patterns: ${ignorePatterns.join(', ')}`);
+    }
     
     // Find all JSON files
-    const jsonFiles = await findJsonFiles(folder);
+    const jsonFiles = await findJsonFiles(folder, ignorePatterns);
     
     if (jsonFiles.length === 0) {
       core.warning(`No JSON files found in ${folder}`);

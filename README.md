@@ -8,9 +8,10 @@ A GitHub Action to validate JSON files in your repository, with optional JSON Sc
 - ✅ Optional JSON Schema validation
 - ✅ **Automatic schema detection from `$schema` property**
 - ✅ Supports relative and absolute schema paths
+- ✅ **Configurable ignore patterns** - customize which files/folders to skip
 - ✅ Configurable folder scanning (defaults to entire repository)
 - ✅ Clear error reporting with file paths
-- ✅ Automatically ignores `node_modules`, `dist`, `lib`, and `.git` folders
+- ✅ Defaults to ignoring `node_modules`, `dist`, `lib`, and `.git` folders
 - ✅ Comprehensive test suite
 
 ## Usage
@@ -46,6 +47,31 @@ jobs:
     schema: 'schemas/data.schema.json'
 ```
 
+### Custom Ignore Patterns
+
+You can customize which files and folders to ignore:
+
+```yaml
+- uses: woeterman94/json-validator-typescript-action@v1
+  with:
+    folder: '.'
+    ignore: |
+      **/node_modules/**
+      **/dist/**
+      **/build/**
+      **/.git/**
+      **/temp/**
+```
+
+Or use comma-separated patterns:
+
+```yaml
+- uses: woeterman94/json-validator-typescript-action@v1
+  with:
+    folder: '.'
+    ignore: '**/node_modules/**, **/dist/**, **/build/**, **/.git/**, **/temp/**'
+```
+
 ### Automatic Schema Detection
 
 JSON files can specify their own schema using the `$schema` property. The action will automatically validate these files against their specified schema:
@@ -71,6 +97,7 @@ This feature works with:
 |-------|-------------|----------|---------|
 | `folder` | Folder location to scan for JSON files | No | `.` (repository root) |
 | `schema` | Path to JSON schema file for validation | No | `` (syntax validation only) |
+| `ignore` | Glob patterns to ignore (comma or newline separated) | No | `**/node_modules/**, **/dist/**, **/lib/**, **/.git/**` |
 
 ## Outputs
 

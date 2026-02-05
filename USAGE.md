@@ -51,7 +51,31 @@ jobs:
           schema: 'schemas/data.schema.json'
 ```
 
-## Example 4: Multiple Folder Validation
+## Example 4: Custom Ignore Patterns
+
+```yaml
+name: Validate with Custom Ignore
+on: [push, pull_request]
+
+jobs:
+  validate-custom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate with custom ignore patterns
+        uses: woeterman94/json-validator-typescript-action@v1
+        with:
+          folder: '.'
+          ignore: |
+            **/node_modules/**
+            **/dist/**
+            **/build/**
+            **/.git/**
+            **/test/**
+            **/fixtures/**
+```
+
+## Example 5: Multiple Folder Validation
 
 ```yaml
 name: Validate All JSON
@@ -71,7 +95,7 @@ jobs:
           folder: ${{ matrix.folder }}
 ```
 
-## Example 5: With Outputs
+## Example 6: With Outputs
 
 ```yaml
 name: Validate and Report
@@ -95,7 +119,31 @@ jobs:
           echo "❌ Invalid files: ${{ steps.validation.outputs.invalid-files }}"
 ```
 
-## Example 6: Conditional Execution
+## Example 6: With Outputs
+
+```yaml
+name: Validate and Report
+on: [push, pull_request]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JSON files
+        id: validation
+        uses: woeterman94/json-validator-typescript-action@v1
+        with:
+          folder: '.'
+      
+      - name: Display results
+        if: always()
+        run: |
+          echo "✅ Valid files: ${{ steps.validation.outputs.valid-files }}"
+          echo "❌ Invalid files: ${{ steps.validation.outputs.invalid-files }}"
+```
+
+## Example 7: Conditional Execution
 
 ```yaml
 name: Conditional Validation

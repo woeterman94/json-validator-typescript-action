@@ -7,7 +7,7 @@ interface ValidationResult {
 /**
  * Find all JSON files in the specified folder
  */
-export declare function findJsonFiles(folder: string): Promise<string[]>;
+export declare function findJsonFiles(folder: string, ignorePatterns?: string[]): Promise<string[]>;
 /**
  * Extract schema reference from JSON content
  */

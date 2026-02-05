@@ -32,6 +32,27 @@ describe('JSON Validator', () => {
       const files = await findJsonFiles(emptyDir);
       expect(files).toEqual([]);
     });
+
+    it('should respect custom ignore patterns', async () => {
+      const relativeDir = path.relative(process.cwd(), fixturesDir);
+      // Ignore the 'invalid' directory
+      const files = await findJsonFiles(relativeDir, ['**/invalid/**']);
+      expect(files.length).toBeGreaterThan(0);
+      expect(files.every(f => !f.includes('/invalid/'))).toBe(true);
+    });
+
+    it('should use default ignore patterns when none provided', async () => {
+      const relativeDir = path.relative(process.cwd(), path.join(fixturesDir, 'valid'));
+      const filesDefault = await findJsonFiles(relativeDir);
+      const filesExplicit = await findJsonFiles(relativeDir, ['**/node_modules/**', '**/dist/**', '**/lib/**', '**/.git/**']);
+      expect(filesDefault.length).toBe(filesExplicit.length);
+    });
+
+    it('should allow empty ignore patterns', async () => {
+      const relativeDir = path.relative(process.cwd(), path.join(fixturesDir, 'valid'));
+      const files = await findJsonFiles(relativeDir, []);
+      expect(files.length).toBeGreaterThan(0);
+    });
   });
 
   describe('validateJsonSyntax', () => {
