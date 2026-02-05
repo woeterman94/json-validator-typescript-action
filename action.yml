@@ -1,4 +1,4 @@
-name: 'JSON file Validator'
+name: 'Wouter's JSON Validator'
 description: 'Validate JSON files in a repository, optionally against a JSON schema'
 author: 'woeterman94'
 
