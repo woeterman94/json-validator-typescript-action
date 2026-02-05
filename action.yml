@@ -15,6 +15,10 @@ inputs:
     description: 'Glob patterns to ignore (comma or newline separated). Defaults to node_modules, dist, lib, and .git'
     required: false
     default: '**/node_modules/**, **/dist/**, **/lib/**, **/.git/**'
+  fail-on-invalid:
+    description: 'Whether to fail the action when invalid JSON files are found (default: true)'
+    required: false
+    default: 'true'
 
 outputs:
   valid-files:

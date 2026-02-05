@@ -38883,6 +38883,7 @@ async function run() {
         const folder = core.getInput('folder') || '.';
         const schemaPath = core.getInput('schema');
         const ignoreInput = core.getInput('ignore');
+        const failOnInvalid = core.getInput('fail-on-invalid') !== 'false';
         // Parse ignore patterns (support comma or newline separated)
         const ignorePatterns = ignoreInput
             ? ignoreInput
@@ -38946,22 +38947,23 @@ async function run() {
         // Separate valid and invalid files
         const validFiles = results.filter(r => r.valid);
         const invalidFiles = results.filter(r => !r.valid);
-        // Report results
-        core.info(`\nValidation Results:`);
-        core.info(`✓ Valid files: ${validFiles.length}`);
-        if (invalidFiles.length > 0) {
-            core.error(`✗ Invalid files: ${invalidFiles.length}`);
-            for (const result of invalidFiles) {
-                const relativePath = path.relative(process.cwd(), result.file);
-                core.error(`  - ${relativePath}: ${result.error}`);
-            }
-        }
         // Set outputs
         core.setOutput('valid-files', validFiles.length);
         core.setOutput('invalid-files', invalidFiles.length);
-        // Fail the action if there are invalid files
+        // Report results
         if (invalidFiles.length > 0) {
-            core.setFailed(`Found ${invalidFiles.length} invalid JSON file(s)`);
+            core.info(`\nFound invalid or incomplete json files:`);
+            for (const result of invalidFiles) {
+                const relativePath = path.relative(process.cwd(), result.file);
+                core.info(`❌ ./${relativePath}`);
+            }
+            // Fail the action if configured to do so
+            if (failOnInvalid) {
+                core.setFailed(`Found ${invalidFiles.length} invalid JSON file(s)`);
+            }
+            else {
+                core.warning(`Found ${invalidFiles.length} invalid JSON file(s) - continuing due to fail-on-invalid=false`);
+            }
         }
         else {
             core.info(`\n✓ All JSON files are valid!`);

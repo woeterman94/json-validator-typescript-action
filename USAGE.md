@@ -137,6 +137,31 @@ jobs:
         uses: woeterman94/json-validator-typescript-action@v1
 ```
 
+## Example 8: Report Invalid Files Without Failing
+
+```yaml
+name: JSON Validation Report
+on: [push, pull_request]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JSON files (report only)
+        uses: woeterman94/json-validator-typescript-action@v1
+        with:
+          folder: '.'
+          fail-on-invalid: false
+```
+
+This will report invalid files without failing the action:
+```
+Found invalid or incomplete json files:
+❌ ./config/invalid-config.json
+❌ ./data/malformed.json
+```
+
 ## JSON Schema Example
 
 Here's an example JSON schema file that you can use:

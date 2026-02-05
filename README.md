@@ -9,6 +9,7 @@ A GitHub Action to validate JSON files in your repository, with optional JSON Sc
 - ✅ **Automatic schema detection from `$schema` property**
 - ✅ Supports relative and absolute schema paths
 - ✅ **Configurable ignore patterns** - customize which files/folders to skip
+- ✅ **Optional failure mode** - choose whether invalid JSON fails the action (default: true)
 - ✅ Configurable folder scanning (defaults to entire repository)
 - ✅ Clear error reporting with file paths
 - ✅ Defaults to ignoring `node_modules`, `dist`, `lib`, and `.git` folders
@@ -98,6 +99,7 @@ This feature works with:
 | `folder` | Folder location to scan for JSON files | No | `.` (repository root) |
 | `schema` | Path to JSON schema file for validation | No | `` (syntax validation only) |
 | `ignore` | Glob patterns to ignore (comma or newline separated) | No | `**/node_modules/**, **/dist/**, **/lib/**, **/.git/**` |
+| `fail-on-invalid` | Whether to fail the action when invalid JSON files are found | No | `true` |
 
 ## Outputs
 
@@ -154,6 +156,24 @@ jobs:
         uses: woeterman94/json-validator-typescript-action@v1
         with:
           folder: ${{ matrix.folder }}
+```
+
+### Report Invalid Files Without Failing
+
+You can set `fail-on-invalid: false` to report invalid JSON files without failing the action:
+
+```yaml
+- uses: woeterman94/json-validator-typescript-action@v1
+  with:
+    folder: '.'
+    fail-on-invalid: false
+```
+
+This will output:
+```
+Found invalid or incomplete json files:
+❌ ./path/to/file1.json
+❌ ./path/to/file2.json
 ```
 
 ## How It Works
