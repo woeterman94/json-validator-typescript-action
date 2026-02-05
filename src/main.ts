@@ -44,7 +44,7 @@ function validateJsonSyntax(filePath: string): ValidationResult {
 /**
  * Load JSON schema from file
  */
-function loadSchema(schemaPath: string): any {
+function loadSchema(schemaPath: string): object {
   try {
     const schemaContent = fs.readFileSync(schemaPath, 'utf-8');
     return JSON.parse(schemaContent);
