@@ -1,0 +1,69 @@
+name: Test JSON Validator Action
+
+on:
+  push:
+    branches: [main, copilot/**]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-valid-folder:
+    runs-on: ubuntu-latest
+    name: Test Valid JSON Files
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Validate JSON files in test-data/valid
+        id: validate-valid
+        uses: ./
+        with:
+          folder: 'test-data/valid'
+      
+      - name: Output results
+        run: |
+          echo "Valid files: ${{ steps.validate-valid.outputs.valid-files }}"
+          echo "Invalid files: ${{ steps.validate-valid.outputs.invalid-files }}"
+
+  test-invalid-folder:
+    runs-on: ubuntu-latest
+    name: Test Invalid JSON Files (Expected to Fail)
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Validate JSON files in test-data/invalid
+        id: validate-invalid
+        uses: ./
+        with:
+          folder: 'test-data/invalid'
+        continue-on-error: true
+      
+      - name: Output results
+        if: always()
+        run: |
+          echo "Valid files: ${{ steps.validate-invalid.outputs.valid-files }}"
+          echo "Invalid files: ${{ steps.validate-invalid.outputs.invalid-files }}"
+
+  test-schema-validation:
+    runs-on: ubuntu-latest
+    name: Test Schema Validation
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Validate with schema
+        id: validate-schema
+        uses: ./
+        with:
+          folder: 'test-data/valid'
+          schema: 'test-data/user.schema.json'
+        continue-on-error: true
+      
+      - name: Output results
+        if: always()
+        run: |
+          echo "Valid files: ${{ steps.validate-schema.outputs.valid-files }}"
+          echo "Invalid files: ${{ steps.validate-schema.outputs.invalid-files }}"

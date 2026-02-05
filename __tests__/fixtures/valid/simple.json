@@ -1,0 +1,6 @@
+{
+  "name": "valid-json",
+  "description": "This is a valid JSON file",
+  "version": "1.0.0",
+  "items": [1, 2, 3]
+}

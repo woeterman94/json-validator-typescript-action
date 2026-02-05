@@ -1,0 +1,4 @@
+{
+  "name": "missing-comma"
+  "error": "this should fail"
+}

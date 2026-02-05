@@ -1,0 +1,35 @@
+name: 'JSON Validator'
+description: 'Validate JSON files in a repository, optionally against a JSON schema'
+author: 'woeterman94'
+
+inputs:
+  folder:
+    description: 'Folder location to scan for JSON files (defaults to repository root)'
+    required: false
+    default: '.'
+  schema:
+    description: 'Path to JSON schema file for validation (optional)'
+    required: false
+    default: ''
+  ignore:
+    description: 'Glob patterns to ignore (comma or newline separated). Defaults to node_modules, dist, lib, and .git'
+    required: false
+    default: '**/node_modules/**, **/dist/**, **/lib/**, **/.git/**'
+  fail-on-invalid:
+    description: 'Whether to fail the action when invalid JSON files are found (default: true)'
+    required: false
+    default: 'true'
+
+outputs:
+  valid-files:
+    description: 'Number of valid JSON files found'
+  invalid-files:
+    description: 'Number of invalid JSON files found'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'check-circle'
+  color: 'green'
