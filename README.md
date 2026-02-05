@@ -6,9 +6,12 @@ A GitHub Action to validate JSON files in your repository, with optional JSON Sc
 
 - ✅ Validates JSON syntax in your repository
 - ✅ Optional JSON Schema validation
+- ✅ **Automatic schema detection from `$schema` property**
+- ✅ Supports relative and absolute schema paths
 - ✅ Configurable folder scanning (defaults to entire repository)
 - ✅ Clear error reporting with file paths
 - ✅ Automatically ignores `node_modules`, `dist`, `lib`, and `.git` folders
+- ✅ Comprehensive test suite
 
 ## Usage
 
@@ -42,6 +45,25 @@ jobs:
     folder: 'data'
     schema: 'schemas/data.schema.json'
 ```
+
+### Automatic Schema Detection
+
+JSON files can specify their own schema using the `$schema` property. The action will automatically validate these files against their specified schema:
+
+```json
+{
+  "$schema": "./user.schema.json",
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+```
+
+This feature works with:
+- ✅ Relative paths (e.g., `./schema.json`, `../schemas/user.schema.json`)
+- ✅ Schemas stored in the same repository
+- ❌ HTTP/HTTPS URLs (only local schemas are supported)
+
+**Note:** If a global `schema` input is provided, it takes precedence over individual `$schema` properties.
 
 ## Inputs
 
@@ -111,9 +133,23 @@ jobs:
 
 1. The action scans the specified folder (or entire repository) for all `.json` files
 2. Each JSON file is validated for proper syntax
-3. If a schema is provided, files are also validated against the JSON Schema
-4. The action reports all validation errors with file paths
-5. The action fails if any invalid JSON files are found
+3. If a global schema is provided via the `schema` input, all files are validated against it
+4. If no global schema is provided, the action checks each JSON file for a `$schema` property
+5. Files with a `$schema` property are validated against their specified schema (if it exists locally)
+6. The action reports all validation errors with file paths
+7. The action fails if any invalid JSON files are found
+
+## Testing
+
+This action includes a comprehensive test suite. To run tests:
+
+```bash
+npm install
+npm test
+
+# Run with coverage
+npm run test:coverage
+```
 
 ## Development
 

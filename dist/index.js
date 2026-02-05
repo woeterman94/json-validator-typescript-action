@@ -38780,6 +38780,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.findJsonFiles = findJsonFiles;
+exports.extractSchemaFromJson = extractSchemaFromJson;
+exports.validateJsonSyntax = validateJsonSyntax;
+exports.loadSchema = loadSchema;
+exports.validateJsonSchema = validateJsonSchema;
+exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const fs = __importStar(__nccwpck_require__(9896));
 const path = __importStar(__nccwpck_require__(6928));
@@ -38798,6 +38804,28 @@ async function findJsonFiles(folder) {
         ignore: ['**/node_modules/**', '**/dist/**', '**/lib/**', '**/.git/**']
     });
     return files;
+}
+/**
+ * Extract schema reference from JSON content
+ */
+function extractSchemaFromJson(content, filePath) {
+    try {
+        const data = JSON.parse(content);
+        if (data && typeof data === 'object' && '$schema' in data && typeof data.$schema === 'string') {
+            const schemaRef = data.$schema;
+            // If it's a URL, return null (we only support local schemas)
+            if (schemaRef.startsWith('http://') || schemaRef.startsWith('https://')) {
+                return null;
+            }
+            // If it's a relative path, resolve it relative to the JSON file
+            const dir = path.dirname(filePath);
+            return path.resolve(dir, schemaRef);
+        }
+    }
+    catch (error) {
+        // Ignore parse errors here, they'll be caught in validation
+    }
+    return null;
 }
 /**
  * Validate JSON file syntax
@@ -38865,21 +38893,39 @@ async function run() {
         }
         core.info(`Found ${jsonFiles.length} JSON file(s)`);
         // Prepare schema validation if provided
-        let validate = null;
+        let globalValidate = null;
         if (schemaPath) {
-            core.info(`Using schema: ${schemaPath}`);
+            core.info(`Using global schema: ${schemaPath}`);
             const schema = loadSchema(schemaPath);
             const ajv = new ajv_1.default({ allErrors: true });
             (0, ajv_formats_1.default)(ajv);
-            validate = ajv.compile(schema);
+            globalValidate = ajv.compile(schema);
         }
         // Validate each file
         const results = [];
         for (const file of jsonFiles) {
             const relativePath = path.relative(process.cwd(), file);
-            if (validate) {
+            // Check if file has its own schema reference
+            let fileValidate = globalValidate;
+            if (!globalValidate) {
+                try {
+                    const content = fs.readFileSync(file, 'utf-8');
+                    const fileSchemaPath = extractSchemaFromJson(content, file);
+                    if (fileSchemaPath && fs.existsSync(fileSchemaPath)) {
+                        core.info(`Using schema from $schema property for ${relativePath}: ${path.relative(process.cwd(), fileSchemaPath)}`);
+                        const schema = loadSchema(fileSchemaPath);
+                        const ajv = new ajv_1.default({ allErrors: true });
+                        (0, ajv_formats_1.default)(ajv);
+                        fileValidate = ajv.compile(schema);
+                    }
+                }
+                catch (error) {
+                    // If we can't read the file or schema, the validation will catch it
+                }
+            }
+            if (fileValidate) {
                 // Validate against schema (which also checks syntax)
-                results.push(validateJsonSchema(file, validate));
+                results.push(validateJsonSchema(file, fileValidate));
             }
             else {
                 // Only validate syntax
@@ -38915,7 +38961,10 @@ async function run() {
         core.setFailed(`Action failed: ${errorMessage}`);
     }
 }
-run();
+// Only run if this is the main module
+if (require.main === require.cache[eval('__filename')]) {
+    run();
+}
 
 
 /***/ }),

@@ -1,0 +1,5 @@
+{
+  "$schema": "./product.schema.json",
+  "name": "Product A",
+  "price": -10
+}

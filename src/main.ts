@@ -14,7 +14,7 @@ interface ValidationResult {
 /**
  * Find all JSON files in the specified folder
  */
-async function findJsonFiles(folder: string): Promise<string[]> {
+export async function findJsonFiles(folder: string): Promise<string[]> {
   const searchPath = path.join(process.cwd(), folder);
   
   // Use fast-glob to find all .json files recursively
@@ -28,9 +28,33 @@ async function findJsonFiles(folder: string): Promise<string[]> {
 }
 
 /**
+ * Extract schema reference from JSON content
+ */
+export function extractSchemaFromJson(content: string, filePath: string): string | null {
+  try {
+    const data = JSON.parse(content);
+    if (data && typeof data === 'object' && '$schema' in data && typeof data.$schema === 'string') {
+      const schemaRef = data.$schema;
+      
+      // If it's a URL, return null (we only support local schemas)
+      if (schemaRef.startsWith('http://') || schemaRef.startsWith('https://')) {
+        return null;
+      }
+      
+      // If it's a relative path, resolve it relative to the JSON file
+      const dir = path.dirname(filePath);
+      return path.resolve(dir, schemaRef);
+    }
+  } catch (error) {
+    // Ignore parse errors here, they'll be caught in validation
+  }
+  return null;
+}
+
+/**
  * Validate JSON file syntax
  */
-function validateJsonSyntax(filePath: string): ValidationResult {
+export function validateJsonSyntax(filePath: string): ValidationResult {
   try {
     const content = fs.readFileSync(filePath, 'utf-8');
     JSON.parse(content);
@@ -44,7 +68,7 @@ function validateJsonSyntax(filePath: string): ValidationResult {
 /**
  * Load JSON schema from file
  */
-function loadSchema(schemaPath: string): object {
+export function loadSchema(schemaPath: string): object {
   try {
     const schemaContent = fs.readFileSync(schemaPath, 'utf-8');
     return JSON.parse(schemaContent);
@@ -56,7 +80,7 @@ function loadSchema(schemaPath: string): object {
 /**
  * Validate JSON file against schema
  */
-function validateJsonSchema(
+export function validateJsonSchema(
   filePath: string,
   validate: ValidateFunction
 ): ValidationResult {
@@ -82,7 +106,7 @@ function validateJsonSchema(
 /**
  * Main function
  */
-async function run(): Promise<void> {
+export async function run(): Promise<void> {
   try {
     // Get inputs
     const folder = core.getInput('folder') || '.';
@@ -103,13 +127,13 @@ async function run(): Promise<void> {
     core.info(`Found ${jsonFiles.length} JSON file(s)`);
     
     // Prepare schema validation if provided
-    let validate: ValidateFunction | null = null;
+    let globalValidate: ValidateFunction | null = null;
     if (schemaPath) {
-      core.info(`Using schema: ${schemaPath}`);
+      core.info(`Using global schema: ${schemaPath}`);
       const schema = loadSchema(schemaPath);
       const ajv = new Ajv({ allErrors: true });
       addFormats(ajv);
-      validate = ajv.compile(schema);
+      globalValidate = ajv.compile(schema);
     }
     
     // Validate each file
@@ -117,9 +141,28 @@ async function run(): Promise<void> {
     for (const file of jsonFiles) {
       const relativePath = path.relative(process.cwd(), file);
       
-      if (validate) {
+      // Check if file has its own schema reference
+      let fileValidate = globalValidate;
+      if (!globalValidate) {
+        try {
+          const content = fs.readFileSync(file, 'utf-8');
+          const fileSchemaPath = extractSchemaFromJson(content, file);
+          
+          if (fileSchemaPath && fs.existsSync(fileSchemaPath)) {
+            core.info(`Using schema from $schema property for ${relativePath}: ${path.relative(process.cwd(), fileSchemaPath)}`);
+            const schema = loadSchema(fileSchemaPath);
+            const ajv = new Ajv({ allErrors: true });
+            addFormats(ajv);
+            fileValidate = ajv.compile(schema);
+          }
+        } catch (error) {
+          // If we can't read the file or schema, the validation will catch it
+        }
+      }
+      
+      if (fileValidate) {
         // Validate against schema (which also checks syntax)
-        results.push(validateJsonSchema(file, validate));
+        results.push(validateJsonSchema(file, fileValidate));
       } else {
         // Only validate syntax
         results.push(validateJsonSyntax(file));
@@ -159,4 +202,7 @@ async function run(): Promise<void> {
   }
 }
 
-run();
+// Only run if this is the main module
+if (require.main === module) {
+  run();
+}
