@@ -92,6 +92,18 @@ This feature works with:
 
 **Note:** If a global `schema` input is provided, it takes precedence over individual `$schema` properties.
 
+## Output Format
+
+When invalid JSON files are found, the action **always** displays them in this format:
+
+```
+Found invalid or incomplete json files:
+❌ ./path/to/file1.json
+❌ ./path/to/file2.json
+```
+
+This output format is consistent regardless of the `fail-on-invalid` setting. The `fail-on-invalid` parameter only controls whether the action exits with a failure status code.
+
 ## Inputs
 
 | Input | Description | Required | Default |
@@ -169,12 +181,7 @@ You can set `fail-on-invalid: false` to report invalid JSON files without failin
     fail-on-invalid: false
 ```
 
-This will output:
-```
-Found invalid or incomplete json files:
-❌ ./path/to/file1.json
-❌ ./path/to/file2.json
-```
+With this setting, invalid files are still reported in the standard output format, but the action will exit successfully instead of failing. This is useful for reporting purposes or when you want to track JSON validity without blocking workflows.
 
 ## How It Works
 

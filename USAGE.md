@@ -155,12 +155,7 @@ jobs:
           fail-on-invalid: false
 ```
 
-This will report invalid files without failing the action:
-```
-Found invalid or incomplete json files:
-❌ ./config/invalid-config.json
-❌ ./data/malformed.json
-```
+With `fail-on-invalid: false`, invalid files are reported but the action exits successfully. The output format is the same as when `fail-on-invalid: true` (the default).
 
 ## JSON Schema Example
 
