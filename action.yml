@@ -1,0 +1,27 @@
+name: 'JSON Validator'
+description: 'Validate JSON files in a repository, optionally against a JSON schema'
+author: 'woeterman94'
+
+inputs:
+  folder:
+    description: 'Folder location to scan for JSON files (defaults to repository root)'
+    required: false
+    default: '.'
+  schema:
+    description: 'Path to JSON schema file for validation (optional)'
+    required: false
+    default: ''
+
+outputs:
+  valid-files:
+    description: 'Number of valid JSON files found'
+  invalid-files:
+    description: 'Number of invalid JSON files found'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'check-circle'
+  color: 'green'
