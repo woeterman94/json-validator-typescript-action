@@ -119,30 +119,6 @@ jobs:
           echo "❌ Invalid files: ${{ steps.validation.outputs.invalid-files }}"
 ```
 
-## Example 6: With Outputs
-
-```yaml
-name: Validate and Report
-on: [push, pull_request]
-
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Validate JSON files
-        id: validation
-        uses: woeterman94/json-validator-typescript-action@v1
-        with:
-          folder: '.'
-      
-      - name: Display results
-        if: always()
-        run: |
-          echo "✅ Valid files: ${{ steps.validation.outputs.valid-files }}"
-          echo "❌ Invalid files: ${{ steps.validation.outputs.invalid-files }}"
-```
-
 ## Example 7: Conditional Execution
 
 ```yaml
