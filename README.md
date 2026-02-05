@@ -215,6 +215,23 @@ npm run build
 npm run package
 ```
 
+Or use the combined command:
+
+```bash
+npm run all
+```
+
+**Important:** Always run `npm run all` after making changes to the source code to update the `dist` folder. The `dist` folder must be committed as it contains the compiled code that GitHub Actions runs.
+
+### CI/CD
+
+This repository includes a build workflow that:
+- Automatically builds and verifies the `dist` folder is up-to-date
+- Runs tests to ensure code quality
+- Validates that contributors have run `npm run all` before committing
+
+The workflow runs on all pushes and pull requests to ensure the compiled code is always in sync with the source.
+
 ### Testing Locally
 
 ```bash
