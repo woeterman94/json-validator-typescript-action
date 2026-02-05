@@ -12,27 +12,41 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 3. Make your changes to the source code in `src/`
 
-4. **Build and package your changes** (Important!):
+4. **(Optional)** Build and package your changes locally:
    ```bash
    npm run all
    ```
    This command compiles TypeScript and packages the action into the `dist` folder.
 
-5. Commit both your source changes AND the updated `dist` folder:
+5. Commit your source changes:
    ```bash
-   git add src/ dist/
+   git add src/
    git commit -m "Your descriptive commit message"
    ```
 
+When you push to the `main` branch, the `dist` folder will be automatically built and committed by our CI workflow.
+
 ## Important: The `dist` Folder
 
-The `dist` folder contains the compiled JavaScript code that GitHub Actions actually runs. It **must** be kept in sync with the source code:
+The `dist` folder contains the compiled JavaScript code that GitHub Actions actually runs. It **must** be kept in sync with the source code.
 
-- Always run `npm run all` after making changes to `src/`
-- Always commit the updated `dist` folder along with your source changes
-- The CI build workflow will verify that `dist` is up-to-date
+### Automatic Build (Recommended)
 
-If you forget to update `dist`, the CI build will fail with an error message telling you to run `npm run all`.
+When you push to the `main` branch, a GitHub Actions workflow automatically:
+- Builds the `dist` folder from your source code
+- Commits and pushes the updated `dist` folder back to the repository
+
+This means you can focus on your source code changes and let CI handle the compilation.
+
+### Manual Build (Optional)
+
+If you want to preview the compiled code locally or ensure it's up-to-date before pushing:
+
+```bash
+npm run all
+```
+
+For pull requests, the CI build workflow will verify that `dist` would be up-to-date if your changes were merged.
 
 ## Running Tests
 
@@ -74,12 +88,13 @@ Before submitting a pull request:
 ## Pull Request Process
 
 1. Create a new branch for your feature or bugfix
-2. Make your changes
-3. Run `npm run all` to update the `dist` folder
-4. Commit all changes including `dist/`
+2. Make your changes to the source code
+3. **(Optional)** Run `npm run all` to preview the compiled code locally
+4. Commit your source code changes
 5. Push your branch and create a pull request
-6. Wait for CI checks to pass (build, tests)
-7. Address any review feedback
+6. Wait for CI checks to pass (build verification, tests)
+7. Once merged to `main`, the dist folder will be automatically built and committed
+8. Address any review feedback
 
 ## Questions?
 
