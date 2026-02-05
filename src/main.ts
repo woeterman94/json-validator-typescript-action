@@ -197,13 +197,17 @@ export async function run(): Promise<void> {
       for (const result of invalidFiles) {
         const relativePath = path.relative(process.cwd(), result.file);
         core.info(`❌ ./${relativePath}`);
+        // Also log error details as annotations
+        if (result.error) {
+          core.error(`${relativePath}: ${result.error}`);
+        }
       }
       
       // Fail the action if configured to do so
       if (failOnInvalid) {
         core.setFailed(`Found ${invalidFiles.length} invalid JSON file(s)`);
       } else {
-        core.warning(`Found ${invalidFiles.length} invalid JSON file(s) - continuing due to fail-on-invalid=false`);
+        core.warning(`Found ${invalidFiles.length} invalid JSON file(s) - continuing because fail-on-invalid is disabled`);
       }
     } else {
       core.info(`\n✓ All JSON files are valid!`);
