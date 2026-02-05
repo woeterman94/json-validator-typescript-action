@@ -10,6 +10,8 @@ jobs:
   test-valid-folder:
     runs-on: ubuntu-latest
     name: Test Valid JSON Files
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,6 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Test Invalid JSON Files (Expected to Fail)
     continue-on-error: true
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,6 +54,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Test Schema Validation
     continue-on-error: true
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
