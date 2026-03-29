@@ -209,11 +209,39 @@ npm run test:coverage
 
 ### Building
 
+The `dist` folder is automatically built and committed when you push to the `main` branch via a GitHub Actions workflow.
+
+For local development and testing:
+
 ```bash
 npm install
 npm run build
 npm run package
 ```
+
+Or use the combined command:
+
+```bash
+npm run all
+```
+
+This compiles the TypeScript source and packages it into the `dist` folder.
+
+### CI/CD Workflows
+
+This repository includes two workflows:
+
+1. **Build and Update Distribution** (`.github/workflows/build-dist.yml`)
+   - Triggers on pushes to `main` when source files change
+   - Automatically builds the `dist` folder
+   - Commits and pushes the updated `dist` folder back to the repository
+   - Eliminates the need for developers to manually build and commit `dist/`
+
+2. **Build and Verify** (`.github/workflows/build.yml`)
+   - Triggers on pull requests to `main`
+   - Verifies that the `dist` folder would be up-to-date if the PR were merged
+   - Runs tests to ensure code quality
+   - Prevents merging PRs with out-of-sync compiled code
 
 ### Testing Locally
 
